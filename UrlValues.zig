@@ -1,7 +1,6 @@
 const UrlValues = @This();
 const string = []const u8;
 const std = @import("std");
-const uri = @import("uri");
 
 inner: std.StringArrayHashMap(string),
 
@@ -23,7 +22,7 @@ pub fn encode(self: UrlValues) !string {
     var i: usize = 0;
     while (iter.next()) |entry| : (i += 1) {
         if (i > 0) try list.writer().writeAll("&");
-        try list.writer().print("{s}={s}", .{ entry.key_ptr.*, try uri.escapeString(alloc, entry.value_ptr.*) });
+        try list.writer().print("{s}={s}", .{ entry.key_ptr.*, try std.Uri.escapeString(alloc, entry.value_ptr.*) });
     }
     return list.toOwnedSlice();
 }

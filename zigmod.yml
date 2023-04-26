@@ -3,4 +3,3 @@ name: UrlValues
 main: UrlValues.zig
 license: MIT
 dependencies:
-  - src: git https://github.com/MasterQ32/zig-uri
