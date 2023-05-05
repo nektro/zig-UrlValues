@@ -25,6 +25,16 @@ pub fn add(self: *UrlValues, key: string, value: string) !void {
     try self.inner.putNoClobber(key, value);
 }
 
+pub fn get(self: *UrlValues, key: string) ?string {
+    return self.inner.get(key);
+}
+
+pub fn take(self: *UrlValues, key: string) ?string {
+    const kv = self.inner.fetchOrderedRemove(key);
+    if (kv == null) return null;
+    return kv.?.value;
+}
+
 pub fn encode(self: UrlValues) !string {
     const alloc = self.inner.allocator;
     var list = std.ArrayList(u8).init(alloc);
