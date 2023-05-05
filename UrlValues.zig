@@ -10,6 +10,17 @@ pub fn init(alloc: std.mem.Allocator) UrlValues {
     };
 }
 
+pub fn initFromString(alloc: std.mem.Allocator, input: string) !UrlValues {
+    var uv = UrlValues.init(alloc);
+    var iter = std.mem.split(u8, input, "&");
+    while (iter.next()) |piece| {
+        if (piece.len == 0) continue;
+        var jter = std.mem.split(u8, piece, "=");
+        try uv.add(jter.next().?, jter.rest());
+    }
+    return uv;
+}
+
 pub fn add(self: *UrlValues, key: string, value: string) !void {
     try self.inner.putNoClobber(key, value);
 }
