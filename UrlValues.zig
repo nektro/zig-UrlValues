@@ -25,7 +25,7 @@ pub fn add(self: *UrlValues, key: string, value: string) !void {
     try self.inner.putNoClobber(key, value);
 }
 
-pub fn get(self: *UrlValues, key: string) ?string {
+pub fn get(self: UrlValues, key: string) ?string {
     return self.inner.get(key);
 }
 
