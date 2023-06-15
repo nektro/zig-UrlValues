@@ -22,7 +22,7 @@ pub fn initFromString(alloc: std.mem.Allocator, input: string) !UrlValues {
 }
 
 pub fn add(self: *UrlValues, key: string, value: string) !void {
-    try self.inner.putNoClobber(key, value);
+    try self.inner.put(key, value);
 }
 
 pub fn get(self: UrlValues, key: string) ?string {
