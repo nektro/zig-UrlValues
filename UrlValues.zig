@@ -16,7 +16,11 @@ pub fn initFromString(alloc: std.mem.Allocator, input: string) !UrlValues {
     while (iter.next()) |piece| {
         if (piece.len == 0) continue;
         var jter = std.mem.split(u8, piece, "=");
-        try uv.add(jter.next().?, jter.rest());
+        var k = jter.next().?;
+        var v = jter.rest();
+        std.mem.replaceScalar(u8, @constCast(v), '+', ' ');
+        v = try std.Uri.unescapeString(alloc, v);
+        try uv.add(k, v);
     }
     return uv;
 }
