@@ -56,11 +56,11 @@ pub fn add(self: *UrlValues, key: string, value: string) !void {
     try self.inner.put(key, value);
 }
 
-pub fn get(self: UrlValues, key: string) ?string {
+pub fn get(self: *UrlValues, key: string) ?string {
     return self.inner.get(key);
 }
 
-pub fn getAll(self: UrlValues, key: string) ?[]const string {
+pub fn getAll(self: *UrlValues, key: string) ?[]const string {
     const entry = self.inner.getEntry(key) orelse return null;
     return entry.value_ptr[0..1];
 }
@@ -71,7 +71,7 @@ pub fn take(self: *UrlValues, key: string) ?string {
     return kv.?.value;
 }
 
-pub fn encode(self: UrlValues) !string {
+pub fn encode(self: *UrlValues) !string {
     const alloc = self.inner.allocator;
     var list = std.ArrayList(u8).init(alloc);
     errdefer list.deinit();
