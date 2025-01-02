@@ -38,10 +38,10 @@ const RawIterator = struct {
         while (ri.iter.next()) |piece| {
             if (piece.len == 0) continue;
             var jter = std.mem.split(u8, piece, "=");
-            var k = jter.next().?;
+            const k = jter.next().?;
             var v = jter.rest();
             std.mem.replaceScalar(u8, @constCast(v), '+', ' ');
-            v = try std.Uri.unescapeString(ri.alloc, v);
+            v = std.Uri.percentDecodeInPlace(try ri.alloc.dupe(u8, v));
             return .{ k, v };
         }
         return null;
@@ -70,7 +70,7 @@ pub fn encode(self: UrlValues) !string {
     var i: usize = 0;
     while (iter.next()) |entry| : (i += 1) {
         if (i > 0) try list.writer().writeAll("&");
-        try list.writer().print("{s}={s}", .{ entry.key_ptr.*, try std.Uri.escapeString(alloc, entry.value_ptr.*) });
+        try list.writer().print("{s}={%}", .{ entry.key_ptr.*, std.Uri.Component{ .raw = entry.value_ptr.* } });
     }
     return list.toOwnedSlice();
 }
