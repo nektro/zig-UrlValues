@@ -20,7 +20,7 @@ pub fn initFromString(alloc: std.mem.Allocator, input: string) !UrlValues {
     while (try iter.next()) |piece| {
         const k = piece[0];
         const v = piece[1];
-        try uv.add(k, v);
+        try uv.append(k, v);
     }
     return uv;
 }
@@ -56,7 +56,7 @@ pub fn set(self: *UrlValues, key: string, value: string) !void {
     const keys = self.inner.items(.key);
     const values = self.inner.items(.value);
     var idx = extras.indexOfSlice(u8, keys, key) orelse {
-        return try self.add(key, value);
+        return try self.append(key, value);
     };
     values[idx] = value;
     while (true) {
@@ -67,7 +67,7 @@ pub fn set(self: *UrlValues, key: string, value: string) !void {
     }
 }
 
-pub fn add(self: *UrlValues, key: string, value: string) !void {
+pub fn append(self: *UrlValues, key: string, value: string) !void {
     try self.inner.append(self.allocator, .{ .key = key, .value = value });
 }
 
