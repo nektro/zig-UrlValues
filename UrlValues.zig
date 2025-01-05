@@ -115,6 +115,26 @@ pub fn take(self: *UrlValues, key: string) ?string {
     return values[idx];
 }
 
+/// if 'value' is null, will delete all the values with key 'key'
+pub fn delete(self: *UrlValues, key: string, value: ?string) void {
+    var offset: usize = 0;
+    while (true) {
+        const keys = self.inner.items(.key);
+        const values = self.inner.items(.value);
+        var idx = extras.indexOfSlice(u8, keys[offset..], key) orelse break;
+        idx += offset;
+        if (idx >= self.inner.len) break;
+        if (!std.mem.eql(u8, keys[idx], key)) break;
+        if (value) |v| {
+            if (!std.mem.eql(u8, values[idx], v)) {
+                offset += 1;
+                continue;
+            }
+        }
+        self.inner.orderedRemove(idx);
+    }
+}
+
 pub fn encode(self: *UrlValues) !string {
     const alloc = self.allocator;
     var list = std.ArrayList(u8).init(alloc);
