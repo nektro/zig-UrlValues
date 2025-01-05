@@ -151,6 +151,10 @@ pub fn has(self: *const UrlValues, key: string, value: ?string) bool {
     return false;
 }
 
+pub fn size(self: *const UrlValues) usize {
+    return self.inner.len;
+}
+
 pub fn encode(self: *UrlValues) !string {
     const alloc = self.allocator;
     var list = std.ArrayList(u8).init(alloc);
