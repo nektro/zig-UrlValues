@@ -59,10 +59,13 @@ pub fn set(self: *UrlValues, key: string, value: string) !void {
         return try self.append(key, value);
     };
     values[idx] = value;
+    idx += 1;
     while (true) {
-        idx += 1;
         if (idx >= self.inner.len) break;
-        if (!std.mem.eql(u8, keys[idx], key)) break;
+        if (!std.mem.eql(u8, keys[idx], key)) {
+            idx += 1;
+            continue;
+        }
         self.inner.orderedRemove(idx);
     }
 }
