@@ -3,5 +3,6 @@ name: UrlValues
 main: UrlValues.zig
 license: MIT
 dependencies:
+  - src: git https://github.com/nektro/zig-extras
 root_dependencies:
   - src: git https://github.com/nektro/zig-expect
