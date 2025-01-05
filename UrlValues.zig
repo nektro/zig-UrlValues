@@ -135,6 +135,22 @@ pub fn delete(self: *UrlValues, key: string, value: ?string) void {
     }
 }
 
+pub fn has(self: *const UrlValues, key: string, value: ?string) bool {
+    const keys = self.inner.items(.key);
+    if (value == null) {
+        return extras.indexOfSlice(u8, keys, key) != null;
+    }
+    const values = self.inner.items(.value);
+    for (keys, 0..) |k, i| {
+        if (std.mem.eql(u8, key, k)) {
+            if (std.mem.eql(u8, value.?, values[i])) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 pub fn encode(self: *UrlValues) !string {
     const alloc = self.allocator;
     var list = std.ArrayList(u8).init(alloc);
