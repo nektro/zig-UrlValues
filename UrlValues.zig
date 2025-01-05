@@ -121,8 +121,11 @@ pub fn encode(self: *UrlValues) !string {
     errdefer list.deinit();
     for (self.inner.items(.key), self.inner.items(.value), 0..) |k, v, i| {
         if (i > 0) try list.writer().writeAll("&");
-        try list.writer().print("{s}={%}", .{ k, std.Uri.Component{ .raw = v } });
+        const fk = fmtUriComponent(std.Uri.Component{ .raw = k }, is_formurlencoded_percent_char);
+        const fv = fmtUriComponent(std.Uri.Component{ .raw = v }, is_formurlencoded_percent_char);
+        try list.writer().print("{}={}", .{ fk, fv });
     }
+    list.items.len -= std.mem.replace(u8, list.items, "%20", "+", list.items) * 2;
     return list.toOwnedSlice();
 }
 
@@ -170,4 +173,74 @@ pub fn findLastSet(self: std.bit_set.DynamicBitSetUnmanaged) ?usize {
     offset -= @clz(self.masks[idx]);
     offset -= 1;
     return offset;
+}
+
+fn percentEncode(writer: anytype, raw: []const u8, isReserved: *const fn (u8) bool) !void {
+    var start: usize = 0;
+    for (raw, 0..) |char, index| {
+        if (!isReserved(char)) continue;
+        try writer.print("{s}%{X:0>2}", .{ raw[start..index], char });
+        start = index + 1;
+    }
+    try writer.writeAll(raw[start..]);
+}
+
+fn fmtUriComponent(component: std.Uri.Component, isReserved: *const fn (u8) bool) std.fmt.Formatter(formatUriComponent) {
+    return .{ .data = .{ .component = component, .isReserved = isReserved } };
+}
+
+fn formatUriComponent(data: struct { component: std.Uri.Component, isReserved: *const fn (u8) bool }, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
+    _ = fmt;
+    _ = options;
+    switch (data.component) {
+        .raw => |raw| try percentEncode(writer, raw, data.isReserved),
+        .percent_encoded => |percent_encoded| try writer.writeAll(percent_encoded),
+    }
+}
+
+fn is_formurlencoded_percent_char(c: u8) bool {
+    if (c == '!') return true;
+    if (c >= '\'' and c <= ')') return true;
+    if (c == '~') return true;
+    return is_component_percent_char(c);
+}
+
+fn is_component_percent_char(c: u8) bool {
+    if (c >= '$' and c <= '&') return true;
+    if (c == '+') return true;
+    if (c == ',') return true;
+    return is_userinfo_percent_char(c);
+}
+
+fn is_userinfo_percent_char(c: u8) bool {
+    if (c == '/') return true;
+    if (c == ':') return true;
+    if (c == ';') return true;
+    if (c == '=') return true;
+    if (c == '@') return true;
+    if (c >= '[' and c <= '^') return true;
+    if (c == '|') return true;
+    return is_path_percent_char(c);
+}
+
+fn is_path_percent_char(c: u8) bool {
+    if (c == '?') return true;
+    if (c == '`') return true;
+    if (c == '{') return true;
+    if (c == '}') return true;
+    return is_query_percent_char(c);
+}
+
+fn is_query_percent_char(c: u8) bool {
+    if (c == '"') return true;
+    if (c == '#') return true;
+    if (c == '<') return true;
+    if (c == '>') return true;
+    if (c == ' ') return true;
+    return is_c0control_percent_char(c);
+}
+
+fn is_c0control_percent_char(c: u8) bool {
+    if (c >= 0x00 and c <= 0x1F) return true;
+    return c > 0x7E;
 }

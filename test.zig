@@ -25,9 +25,9 @@ test {
 
     try x.set("i", " j ");
     try expect(x.get("i")).toEqualString(" j ");
-    try expect(try x.encode()).toEqualString("e=f&g=h&i=%20j%20");
+    try expect(try x.encode()).toEqualString("e=f&g=h&i=+j+");
 
     try x.set("e", "updated");
     try expect(x.get("e")).toEqualString("updated");
-    try expect(try x.encode()).toEqualString("e=updated&g=h&i=%20j%20");
+    try expect(try x.encode()).toEqualString("e=updated&g=h&i=+j+");
 }
