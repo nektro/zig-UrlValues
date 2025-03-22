@@ -41,7 +41,7 @@ const RawIterator = struct {
     fn next(ri: *RawIterator) !?struct { string, string } {
         while (ri.iter.next()) |piece| {
             if (piece.len == 0) continue;
-            var jter = std.mem.split(u8, piece, "=");
+            var jter = std.mem.splitScalar(u8, piece, '=');
             const k = jter.next().?;
             var v = jter.rest();
             std.mem.replaceScalar(u8, @constCast(v), '+', ' ');
