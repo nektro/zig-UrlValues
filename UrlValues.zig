@@ -74,14 +74,14 @@ pub fn append(self: *UrlValues, key: string, value: string) !void {
     try self.inner.append(self.allocator, .{ .key = key, .value = value });
 }
 
-pub fn get(self: *UrlValues, key: string) ?string {
+pub fn get(self: *const UrlValues, key: string) ?string {
     const keys = self.inner.items(.key);
     const idx = extras.indexOfSlice(u8, keys, key) orelse return null;
     const values = self.inner.items(.value);
     return values[idx];
 }
 
-pub fn getAll(self: *UrlValues, key: string) !?[]const string {
+pub fn getAll(self: *const UrlValues, key: string) !?[]const string {
     const keys = self.inner.items(.key);
     const values = self.inner.items(.value);
     var backer: [256]usize = undefined;
@@ -155,7 +155,7 @@ pub fn size(self: *const UrlValues) usize {
     return self.inner.len;
 }
 
-pub fn encode(self: *UrlValues) !string {
+pub fn encode(self: *const UrlValues) !string {
     const alloc = self.allocator;
     var list = std.ArrayList(u8).init(alloc);
     errdefer list.deinit();
